@@ -14,7 +14,7 @@ const app = express()
 app.use(cors())
 app.use(bodyParser.json())
 app.use(logger)
-app.use(express.statid('build'))
+app.use(express.static('web'))
 
 let notes = [
 {
