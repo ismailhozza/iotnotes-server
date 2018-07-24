@@ -1,6 +1,7 @@
 const express = require("express")
 const cors = require("cors")
 const bodyParser = require("body-parser")
+const Note = require("./models/note")
 
 const logger = (req, res, next) => {
     console.log(`Method: ${req.method}`)
@@ -15,6 +16,7 @@ app.use(cors())
 app.use(bodyParser.json())
 app.use(logger)
 app.use(express.static('web'))
+
 
 let notes = [
 {
@@ -38,27 +40,58 @@ let notes = [
 ]
 
 app.get('/', (req, res) => {
-    res.json(notes)
+    // res.json(notes)
+    Note
+        .find({})
+        .then(notes => {
+            res.json(notes)
+        })
 })
 
+const formatNote = (note) => {
+    const formattedNote = { ...note._doc, id: note._id }
+    delete formattedNote._id
+    // delete formattedNote.__v
+    return formattedNote
+}
 app.get('/api/notes', (req, res) => {
-    res.json(notes)
+    Note
+        .find({}, {__v: 0})
+        .then(notes => {
+            res.json(notes.map(formatNote))
+        })
 })
 
 app.get('/api/notes/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const note = notes.find(note => note.id == id)
-    if (note) {
-        res.json(note)
-    } else {
-        res.status(404).end()
-    }
+    Note.findById(req.params.id, {__v: 0})
+        .then((note) => {
+            if (note) {
+                res.json(formatNote(note))
+            } else {
+                res.status(404).end()
+            }
+            // res.json(formatNote(note))
+        })
+        .catch((error) => {
+            console.log(error)
+            res.status(400).send({error: 'malformatted id'})
+        })
 })
 
 app.delete('/api/notes/:id', (req, res) => {
-    const id = Number(req.params.id)
-    notes = notes.filter((n) => n.id !== id)
-    res.status(204).end()
+    // const id = Number(req.params.id)
+    // notes = notes.filter((n) => n.id !== id)
+    // res.status(204).end()
+    console.log(req.params.id)
+    Note.findByIdAndRemove(req.params.id)
+        .then((result) => {
+            // res.json(formatNote(note))
+            res.status(204).end()
+        })
+        .catch(error => {
+            console.log(error)
+            res.status(400).send({error: "malformatted id"})
+        })
 })
 
 const generateId = () => {
@@ -73,16 +106,41 @@ app.post('/api/notes', (req, res) => {
         return res.status(400).json({error: "content missing"})
     }
 
-    const note = {
+    const note = new Note({
         content: body.content,
         important: body.important || false,
         date: new Date(),
-        id: generateId()
+        // id: generateId()
+    })
+
+    // notes = notes.concat(note)
+    note
+        .save()
+        .then(formatNote)
+        .then(savedAndFormattedNote => {
+            res.json(savedAndFormattedNote)
+        })
+
+    // res.json(note)
+})
+
+app.put('/api/notes/:id', (req, res) => {
+    const body = req.body
+
+    const note = {
+        content: body.content,
+        important: body.important
     }
 
-    notes = notes.concat(note)
-
-    res.json(note)
+    Note
+        .findByIdAndUpdate(req.params.id, note, { new: true})
+        .then( updatedNote => {
+            res.json(formatNote(updatedNote))
+        })
+        .catch(error => {
+            console.log(error)
+            res.status(400).send({error: "malformatted id"})
+        })
 })
 
 app.use((req, res) => {
