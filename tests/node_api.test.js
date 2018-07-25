@@ -1,6 +1,7 @@
 const supertest = require("supertest")
 const { app, server } = require("../index")
 const Note = require("../models/note")
+// const User = require("../models/user")
 const api = supertest(app)
 
 const initialNotes = [
