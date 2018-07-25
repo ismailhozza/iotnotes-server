@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "watch": "nodemon index.js",
-    "lint": "eslint .",
-    "test": "jest --verbose --watchAll"
+    "start": "cross-env NODE_ENV=production node index.js",
+    "watch": "cross-env NODE_ENV=development nodemon index.js",
+    "test": "cross-env NODE_ENV=test jest --verbose --watchAll",
+    "lint": "eslint ."
   },
   "author": "Hussein Ismail",
   "license": "ISC",
@@ -19,8 +19,10 @@
     "mongoose": "^5.2.4"
   },
   "devDependencies": {
+    "cross-env": "^5.2.0",
     "eslint": "^5.2.0",
     "jest": "^23.4.1",
-    "nodemon": "^1.18.3"
+    "nodemon": "^1.18.3",
+    "supertest": "^3.1.0"
   }
 }
