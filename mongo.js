@@ -18,7 +18,7 @@ const note = new Note({
 
 note
     .save()
-    .then(response => {
+    .then(() => {
         console.log("note saved")
         mongoose.connection.close()
     })
