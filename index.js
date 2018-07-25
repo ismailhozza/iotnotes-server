@@ -1,22 +1,34 @@
 const express = require("express")
 const cors = require("cors")
 const bodyParser = require("body-parser")
+const mongoose = require("mongoose")
+const middleware = require("./utils/middleware")
 const notesRouter = require("./controllers/notes")
 
-const logger = (req, res, next) => {
-    console.log(`Method: ${req.method}`)
-    console.log(`Path: ${req.path}`)
-    console.log(`Body: ${req.body}`)
-    console.log("---")
-    next()
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config()
 }
+
+const url = process.env.MONGODB_URI
+
+mongoose
+    .connect(url)
+    .then(() => {
+        console.log("connected to database", url)
+    })
+    .catch((error) => {
+        console.log(error)
+    })
 
 const app = express()
 app.use(cors())
 app.use(bodyParser.json())
-app.use(logger)
 app.use(express.static("web"))
+app.use(middleware.logger)
+
 app.use("/api/notes", notesRouter)
+
+app.use(middleware.error)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
