@@ -1,5 +1,5 @@
 const notesRouter = require("express").Router()
-const Note = require("./models/note")
+const Note = require("../models/note")
 
 const formatNote = (note) => {
     const formattedNote = { ...note._doc, id: note._id }
