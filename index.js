@@ -33,7 +33,7 @@ server.listen(config.port, () => {
 })
 
 server.on("close", () => {
-    mongoose.connect.close()
+    mongoose.connection.close()
 })
 
 module.exports = {
